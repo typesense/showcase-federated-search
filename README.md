@@ -2,6 +2,8 @@
 
 This is a demo that showcases Typesense's Federated or Multi-Search feature.
 
+View it live here: [https://federated-search.typesense.org/](https://federated-search.typesense.org/)
+
 # Tech Stack
 
 This search experience is powered by Typesense which is a fast, open source typo-tolerant search-engine. It is an open source alternative to Algolia and an easier-to-use alternative to ElasticSearch.
