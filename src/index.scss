@@ -1,12 +1,14 @@
-@import 'bootstrap';
-@import 'app';
+@use 'sass:color';
+
+@use 'app';
+@use 'bootstrap' as bs;
 
 body * {
   //border: 1px solid red;
 }
 .search-result-card {
   min-height: 50px;
-  background-color: $gray-100;
+  background-color: bs.$gray-100;
   padding: 1rem;
   margin-top: 0.2rem;
 }
@@ -14,19 +16,19 @@ body * {
 a.clickable-search-term {
   color: unset;
   text-decoration-line: underline;
-  text-decoration-color: $gray-500;
+  text-decoration-color: bs.$gray-500;
   -webkit-text-decoration-line: underline;
-  -webkit-text-decoration-color: $gray-500;
+  -webkit-text-decoration-color: bs.$gray-500;
   cursor: pointer;
 
   &:hover {
-    color: darken($link-color, 50%);
+    color: color.adjust(bs.$link-color, $lightness: -50%, $space: hsl);
   }
 }
 
 mark {
   color: unset;
-  background-color: rgba($white, .9);
+  background-color: rgba(bs.$white, 0.9);
   padding: 0 0.08em;
 }
 
@@ -37,7 +39,8 @@ mark {
 }
 
 @media (max-width: 1200px) {
-  h1, .h1 {
+  h1,
+  .h1 {
     font-size: calc(1.6rem + 1.2vw);
   }
 }

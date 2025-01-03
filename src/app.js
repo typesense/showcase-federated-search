@@ -2,7 +2,6 @@ import jQuery from 'jquery';
 
 window.$ = jQuery; // workaround for https://github.com/parcel-bundler/parcel/issues/333
 
-import 'popper.js';
 import 'bootstrap';
 
 import instantsearch from 'instantsearch.js/es';
@@ -13,8 +12,8 @@ import {
   stats,
   index,
 } from 'instantsearch.js/es/widgets';
+
 import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter';
-import images from '../images/*.*';
 
 let TYPESENSE_SERVER_CONFIG = {
   apiKey: process.env.TYPESENSE_SEARCH_ONLY_API_KEY, // Be sure to use an API key that only allows searches, in production
@@ -65,6 +64,8 @@ if (process.env[`TYPESENSE_HOST_NEAREST`]) {
     protocol: process.env.TYPESENSE_PROTOCOL,
   };
 }
+const USER_INDEX_NAME = 'federated_search_users';
+const COMPANY_INDEX_NAME = 'federated_search_companies';
 
 const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
   server: TYPESENSE_SERVER_CONFIG,
@@ -84,14 +85,17 @@ const searchClient = typesenseInstantsearchAdapter.searchClient;
 
 const search = instantsearch({
   searchClient,
-  indexName: 'federated_search_users',
-  searchFunction(helper) {
-    if (helper.state.query === '') {
+  indexName: USER_INDEX_NAME,
+  onStateChange({ uiState, setUiState }) {
+    if (uiState[USER_INDEX_NAME].query === '') {
       $('#results-section').addClass('d-none');
     } else {
       $('#results-section').removeClass('d-none');
-      helper.search();
+      setUiState(uiState);
     }
+  },
+  future: {
+    preserveSharedStateOnUnmount: true,
   },
 });
 
@@ -107,52 +111,50 @@ search.addWidgets([
       loadingIcon: 'stroke-primary',
     },
   }),
-  index({ indexName: 'federated_search_users' }).addWidgets([
-    stats({
-      container: '#stats-users',
-      templates: {
-        text: ({ nbHits, hasNoResults, hasOneResult, processingTimeMS }) => {
-          let statsText = '';
-          if (hasNoResults) {
-            statsText = 'No usernames';
-          } else if (hasOneResult) {
-            statsText = '1 username';
-          } else {
-            statsText = `${nbHits.toLocaleString()} usernames`;
-          }
-          return `Found ${statsText} in ${processingTimeMS}ms.`;
-        },
+  stats({
+    container: '#stats-users',
+    templates: {
+      text: ({ nbHits, hasNoResults, hasOneResult, processingTimeMS }) => {
+        let statsText = '';
+        if (hasNoResults) {
+          statsText = 'No usernames';
+        } else if (hasOneResult) {
+          statsText = '1 username';
+        } else {
+          statsText = `${nbHits.toLocaleString()} usernames`;
+        }
+        return `Found ${statsText} in ${processingTimeMS}ms.`;
       },
-    }),
-    infiniteHits({
-      container: '#hits-users',
-      cssClasses: {
-        list: 'list-unstyled',
-        item: 'd-flex flex-column search-result-card',
-        loadMore: 'btn btn-secondary d-block mt-4',
-        disabledLoadMore: 'btn btn-light mx-auto d-block mt-4',
-      },
-      templates: {
-        item: (data) => {
-          return `
+    },
+  }),
+  infiniteHits({
+    container: '#hits-users',
+    cssClasses: {
+      list: 'list-unstyled',
+      item: 'd-flex flex-column search-result-card',
+      loadMore: 'btn btn-secondary d-block mt-4',
+      disabledLoadMore: 'btn btn-light mx-auto d-block mt-4',
+    },
+    templates: {
+      item: (hit, { html, components }) => {
+        return html`
             <div class="row">
               <div class="col">
-                ${data._highlightResult.username.value}
+                ${components.Highlight({ hit, attribute: 'username' })}
               </div>
             </div>
         `;
-        },
-        empty:
-          'No usernames found for <q>{{ query }}</q>. Try another search term.',
-        showMoreText: 'Show more usernames',
       },
-    }),
-    configure({
-      hitsPerPage: 5,
-    }),
-  ]),
+      empty: (data, { html }) =>
+        html`No usernames found for <q>${data.query}</q>. Try another search term.`,
+      showMoreText: (_, { html }) => html`Show more usernames`,
+    },
+  }),
+  configure({
+    hitsPerPage: 5,
+  }),
 
-  index({ indexName: 'federated_search_companies' }).addWidgets([
+  index({ indexName: COMPANY_INDEX_NAME }).addWidgets([
     stats({
       container: '#stats-companies',
       templates: {
@@ -178,22 +180,19 @@ search.addWidgets([
         disabledLoadMore: 'btn btn-light mx-auto d-block mt-4',
       },
       templates: {
-        item: (data) => {
-          return `
+        item: (hit, { html, components }) => {
+          return html`
             <div class="row">
               <div class="col">
-                ${data._highlightResult.name.value}
+                ${components.Highlight({ hit, attribute: 'name' })}
               </div>
             </div>
         `;
         },
-        empty:
-          'No companies found for <q>{{ query }}</q>. Try another search term.',
-        showMoreText: 'Show more companies',
+        empty: (data, { html }) =>
+          html`No companies found for <q>${data.query}</q>. Try another search term.`,
+        showMoreText: (_, { html }) => html`Show more companies`,
       },
-    }),
-    configure({
-      hitsPerPage: 5,
     }),
   ]),
 ]);
