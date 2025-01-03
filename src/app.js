@@ -81,8 +81,30 @@ const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     },
   },
 });
-const searchClient = typesenseInstantsearchAdapter.searchClient;
+const typesenseClient = typesenseInstantsearchAdapter.searchClient;
 
+const searchClient = {
+  ...typesenseClient,
+  search(requests) {
+    if (requests.every(({ params }) => !params.query)) {
+      // Prevent the initial page load request that has no query
+      return Promise.resolve({
+        results: requests.map(() => ({
+          hits: [],
+          nbHits: 0,
+          nbPages: 0,
+          page: 0,
+          processingTimeMS: 0,
+          hitsPerPage: 0,
+          exhaustiveNbHits: false,
+          query: '',
+          params: '',
+        })),
+      });
+    }
+    return typesenseClient.search(requests);
+  },
+};
 const search = instantsearch({
   searchClient,
   indexName: USER_INDEX_NAME,
@@ -114,7 +136,13 @@ search.addWidgets([
   stats({
     container: '#stats-users',
     templates: {
-      text: ({ nbHits, hasNoResults, hasOneResult, processingTimeMS }) => {
+      text: ({
+        nbHits,
+        hasNoResults,
+        hasOneResult,
+        processingTimeMS,
+        query,
+      }) => {
         let statsText = '';
         if (hasNoResults) {
           statsText = 'No usernames';
@@ -123,7 +151,9 @@ search.addWidgets([
         } else {
           statsText = `${nbHits.toLocaleString()} usernames`;
         }
-        return `Found ${statsText} in ${processingTimeMS}ms.`;
+        return query !== ''
+          ? `Found ${statsText} in ${processingTimeMS}ms.`
+          : ' ';
       },
     },
   }),
@@ -146,7 +176,9 @@ search.addWidgets([
         `;
       },
       empty: (data, { html }) =>
-        html`No usernames found for <q>${data.query}</q>. Try another search term.`,
+        data.query !== ''
+          ? html`No usernames found for <q>${data.query}</q>. Try another search term.`
+          : html`${' '}`,
       showMoreText: (_, { html }) => html`Show more usernames`,
     },
   }),
@@ -158,7 +190,13 @@ search.addWidgets([
     stats({
       container: '#stats-companies',
       templates: {
-        text: ({ nbHits, hasNoResults, hasOneResult, processingTimeMS }) => {
+        text: ({
+          nbHits,
+          hasNoResults,
+          hasOneResult,
+          processingTimeMS,
+          query,
+        }) => {
           let statsText = '';
           if (hasNoResults) {
             statsText = 'No companies';
@@ -167,7 +205,9 @@ search.addWidgets([
           } else {
             statsText = `${nbHits.toLocaleString()} companies`;
           }
-          return `Found ${statsText} in ${processingTimeMS}ms.`;
+          return query !== ''
+            ? `Found ${statsText} in ${processingTimeMS}ms.`
+            : ' ';
         },
       },
     }),
@@ -190,7 +230,9 @@ search.addWidgets([
         `;
         },
         empty: (data, { html }) =>
-          html`No companies found for <q>${data.query}</q>. Try another search term.`,
+          data.query !== ''
+            ? html`No companies found for <q>${data.query}</q>. Try another search term.`
+            : html`${' '}`,
         showMoreText: (_, { html }) => html`Show more companies`,
       },
     }),
