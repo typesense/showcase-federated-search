@@ -8,31 +8,40 @@
     "lint:fix": "npm run lint -- --fix",
     "typesenseServer": "docker run -i -p 8108:8108 -v/tmp/typesense-server-data/:/data typesense/typesense:0.23.0.rc56 --data-dir /data --api-key=xyz --listen-port 8108 --enable-cors",
     "indexData": "node scripts/indexData.js",
-    "build": "parcel build index.html --public-url https://federated-search.typesense.org"
+    "build": "parcel build index.html"
   },
   "engines": {
-    "node": ">=14.0"
+    "node": ">=20.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^6.1.2",
-    "babel-eslint": "10.1.0",
-    "eslint": "8.13.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.0.0",
-    "parcel-bundler": "1.12.5",
-    "prettier": "2.6.2",
-    "sass": "^1.50.1"
+    "@babel/eslint-parser": "^7.25.9",
+    "@faker-js/faker": "^9.3.0",
+    "@parcel/packager-raw-url": "2.13.3",
+    "@parcel/transformer-sass": "^2.13.3",
+    "@parcel/transformer-webmanifest": "2.13.3",
+    "buffer": "^5.5.0||^6.0.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "parcel": "^2.13.3",
+    "prettier": "3.4.2",
+    "process": "^0.11.10",
+    "svgo": "^3"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
     "@popperjs/core": "^2.11.5",
-    "bootstrap": "^5.1.3",
+    "bootstrap": "^5.3.3",
     "dotenv": "^16.0.0",
-    "instantsearch.js": "^4.40.4",
+    "instantsearch.js": "^4.75.6",
     "jquery": "^3.6.0",
     "popper.js": "^1.16.1",
-    "typesense": "^1.2.2",
-    "typesense-instantsearch-adapter": "^2.4.0"
-  }
+    "typesense": "^1.8.2",
+    "typesense-instantsearch-adapter": "^2.8.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead"
+  ]
 }

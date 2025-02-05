@@ -1,96 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="shortcut icon" href="./favicon.png" />
 
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="shortcut icon" href="./favicon.png">
+    <link rel="stylesheet" href="./src/index.scss" />
 
-  <link rel="stylesheet" href="./src/index.scss">
+    <title>Federated Search with Typesense</title>
+    <meta
+      name="description"
+      content="Search multiple collections in parallel with Typesense"
+    />
+    <meta
+      name="keywords"
+      content="federated search, multi search, multi_search, typesense"
+    />
 
-  <title>Federated Search with Typesense</title>
-  <meta name="description"
-        content="Search multiple collections in parallel with Typesense">
-  <meta name="keywords" content="federated search, multi search, multi_search, typesense" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-XTFPJRM8H9"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XTFPJRM8H9"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+      gtag('config', 'G-XTFPJRM8H9');
+    </script>
+  </head>
 
-    gtag('config', 'G-XTFPJRM8H9');
-  </script>
-</head>
-
-<body>
-<div class="container-fluid px-md-5 pt-4">
-  <div class="row d-flex align-items-center">
-    <div class="col-md">
-      <div class="row">
+  <body>
+    <div class="container-fluid px-md-5 pt-4">
+      <div class="row d-flex align-items-center">
         <div class="col-md">
-          <h1 class="text-secondary mb-2">
-            Federated Search
-          </h1>
-          <div class="mb-3 d-flex align-items-center">
-            <span class="me-2">powered by</span>
-            <a href="https://github.com/typesense/typesense" target="_blank" alt="Typesense">
-              <img src="images/typesense.svg" width="114" height="25" />
-            </a>
+          <div class="row">
+            <div class="col-md">
+              <h1 class="text-secondary mb-2">Federated Search</h1>
+              <div class="mb-3 d-flex align-items-center">
+                <span class="me-2">powered by</span>
+                <a
+                  href="https://github.com/typesense/typesense"
+                  target="_blank"
+                  alt="Typesense"
+                >
+                  <img src="images/typesense.svg" width="114" height="25" />
+                </a>
+              </div>
+              <div class="mb-3">
+                <ul>
+                  <li>
+                    The username and company name datasets used below were
+                    generated using Faker.js, and indexed in two different
+                    collections: users and companies.
+                  </li>
+                  <li>
+                    When a search query is typed, it is sent using
+                    <a
+                      href="https://typesense.org/docs/latest/api/documents.html#federated-multi-search"
+                      ><code>multi_query</code> (federated search)</a
+                    >
+                    to both collections and the results are shown side-by-side.
+                  </li>
+                  <li>
+                    This example uses Instantsearch.js and
+                    typesense-instantsearch-adapter for the Search UI.
+                  </li>
+                  <li>
+                    Here's the
+                    <a
+                      href="https://github.com/typesense/showcase-federated-search"
+                      target="_blank"
+                      >source code</a
+                    >.
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div class="mb-3">
-            <ul>
-              <li>The username and company name datasets used below were generated using Faker.js, and indexed in two different collections: users and companies.</li>
-              <li>When a search query is typed, it is sent using <a href="https://typesense.org/docs/latest/api/documents.html#federated-multi-search"><code>multi_query</code> (federated search)</a> to both collections and the results are shown side-by-side.</li>
-              <li>This example uses Instantsearch.js and typesense-instantsearch-adapter for the Search UI.</li>
-              <li>Here's the <a href="https://github.com/typesense/showcase-federated-search" target="_blank">source code</a>.</li>
-            </ul>
+        </div>
+      </div>
+
+      <div id="searchbox-container" class="row pt-3">
+        <div class="col-md justify-content-md-center">
+          <div id="searchbox"></div>
+          <div class="row mt-2 text-muted">
+            <div class="col-md">
+              Try:
+              <span id="example-search-terms">
+                <a role="button" class="clickable-search-term">Moen</a>,
+                <a role="button" class="clickable-search-term">John</a>,
+                <a role="button" class="clickable-search-term">Paris</a>,
+                <a role="button" class="clickable-search-term">Larson</a>,
+                <a role="button" class="clickable-search-term">Becker</a>,
+                <a role="button" class="clickable-search-term">Son</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="results-section" class="mt-5 d-none">
+        <div class="row">
+          <div class="col">
+            <h4 class="mb-3">Users</h4>
+            <div id="stats-users"></div>
+            <div id="hits-users" class="mt-2"></div>
+          </div>
+          <div class="col">
+            <h4 class="mb-3">Companies</h4>
+            <div id="stats-companies"></div>
+            <div id="hits-companies" class="mt-2"></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="searchbox-container" class="row pt-3">
-    <div class="col-md justify-content-md-center">
-      <div id="searchbox"></div>
-      <div class="row mt-2 text-muted">
-        <div class="col-md">
-          Try:
-          <span id="example-search-terms">
-              <a role="button" class="clickable-search-term">Moen</a>,
-              <a role="button" class="clickable-search-term">John</a>,
-              <a role="button" class="clickable-search-term">Paris</a>,
-              <a role="button" class="clickable-search-term">Larson</a>,
-              <a role="button" class="clickable-search-term">Becker</a>,
-              <a role="button" class="clickable-search-term">Son</a>
-            </span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="results-section" class="mt-5">
-    <div class="row">
-      <div class="col">
-        <h4 class="mb-3">Users</h4>
-        <div id="stats-users"></div>
-        <div id="hits-users" class="mt-2"></div>
-      </div>
-      <div class="col">
-        <h4 class="mb-3">Companies</h4>
-        <div id="stats-companies"></div>
-        <div id="hits-companies" class="mt-2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="./src/app.js"></script>
-</body>
-
+    <script type="module" src="./src/app.js"></script>
+  </body>
 </html>
